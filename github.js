@@ -78,7 +78,7 @@ const pageCondenser = (pages) => {
   for (var pageIndex in pages) {
     allBodies = allBodies.concat(pages[pageIndex].body)
   }
-  console.log(allBodies)
+  //console.log(allBodies)
   return allBodies
 }
 
