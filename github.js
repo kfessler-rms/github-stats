@@ -23,7 +23,6 @@ const interpretResponseCode = (statusCode) => {
   return response
 }
 
-
 const authenticate = (options) => {
   var githubHandler
   var apiurl = 'https://api.github.com'
@@ -57,22 +56,30 @@ const authenticate = (options) => {
 const getGithubOrgList = (githubHandler, orgName, privateReposOnly) => {
   return new Promise((resolve, reject) => {
     var url = '/orgs/' + orgName + '/repos?type=all'
-    if (privateReposOnly) url = '/orgs/' + orgName + '/repos?type=private'    
+    if (privateReposOnly) url = '/orgs/' + orgName + '/repos?type=private'
     githubHandler.paged(url)
-    .then((res) => {
-      let interpretedResponse = interpretResponseCode(res.pages[0].statusCode)
+      .then((res) => {
+        let interpretedResponse = interpretResponseCode(res.pages[0].statusCode)
         if (interpretedResponse === 'OK') {
-          resolve(res.pages[0].body);
+          var repos = pageCondenser(res.pages)
+          resolve(repos)
         } else {
-          reject(interpretedResponse);
+          reject(interpretedResponse)
         }
-    })
-    .catch((err) => {
-      reject(err);
-    });
-
-
+      })
+      .catch((err) => {
+        reject(err)
+      })
   })
 }
 
-module.exports = { authenticate, getGithubOrgList }
+const pageCondenser = (pages) => {
+  var allBodies = []
+  for (var pageIndex in pages) {
+    allBodies = allBodies.concat(pages[pageIndex].body)
+  }
+  console.log(allBodies)
+  return allBodies
+}
+
+module.exports = { authenticate, getGithubOrgList, pageCondenser }

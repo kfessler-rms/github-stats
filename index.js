@@ -9,7 +9,7 @@ const figlet = require('figlet')
 var fs = require('fs')
 var path = require('path')
 var contributors = require('./contributors.js')
-var githubUtils = require('./github');
+var githubUtils = require('./github')
 var nbOfDays = 90
 var roundedNbOfWeeks = Math.floor(nbOfDays / 7)
 
@@ -17,8 +17,6 @@ var filePath = path.join(__dirname, '/tmp/')
 var organization = ''
 const EventEmitter = require('events').EventEmitter
 const eventEmitter = new EventEmitter()
-
-
 
 // Adding global Exception tracing
 process.on('uncaughtException', function onUncaughtException (err) {
@@ -28,26 +26,22 @@ process.on('unhandledRejection', function onUnhandledRejection (err) {
   console.log('unhandled Rejection', err)
 })
 
-
-
 const getGithubRepoStats = (githubHandler, orgName, repoName) => {
   return new Promise((resolve, reject) => {
     githubHandler.paged('/repos/' + orgName + '/' + repoName + '/stats/contributors')
-    .then((res) => {
-      let interpretedResponse = interpretResponseCode(res.pages[0].statusCode)
-      if (interpretedResponse === 'OK') {
-        resolve(res.pages[0].body)
-      } else {
-        console.error('Issue with ' + orgName + '/' + repoName)
-        reject({ 'error': interpretedResponse, 'statusCode': res.pages[0].statusCode, 'headers': res.pages[0].headers })
-      }
-    })
-    .catch((err) => {
-      reject(err);
-    });
-
-
-
+      .then((res) => {
+        let interpretedResponse = interpretResponseCode(res.pages[0].statusCode)
+        if (interpretedResponse === 'OK') {
+          var repos = githubUtils.pageCondenser(res.pages)
+          resolve(repos)
+        } else {
+          console.error('Issue with ' + orgName + '/' + repoName)
+          reject({ 'error': interpretedResponse, 'statusCode': res.pages[0].statusCode, 'headers': res.pages[0].headers })
+        }
+      })
+      .catch((err) => {
+        reject(err)
+      })
   })
 }
 
@@ -159,8 +153,6 @@ const promiseProcess = (promiseArray) => {
     eventEmitter.emit('allPromisesCompleted')
   }
 }
-
-
 
 const introText = () => {
   figlet.text('SNYK', {
@@ -367,5 +359,3 @@ const interpretResponseCode = (statusCode) => {
   }
   return response
 }
-
-
