@@ -1,23 +1,23 @@
-var assert = require('assert')
-var expect = require('chai').expect
+let assert = require('assert')
+let expect = require('chai').expect
 
-var fs = require('fs')
-var path = require('path')
-var filePath = path.join(__dirname, './fixtures/')
+let fs = require('fs')
+let path = require('path')
+let filePath = path.join(__dirname, './fixtures/')
 describe('Non connected functions', function () {
   describe('Testing fixtures', function () {
     it('should have an array with 26 items', function () {
-      var data = JSON.parse(fs.readFileSync(filePath + 'aarlaud-snyk', 'utf8'))
+      let data = JSON.parse(fs.readFileSync(filePath + 'aarlaud-snyk', 'utf8'))
       assert.equal(data.length, 26)
     })
 
     it('should have an aarlaud with 3 commits in github-stats', function (done) {
       fs.readFile(filePath + 'aarlaud-snyk', 'utf8', function (err, contents) {
-        var data = JSON.parse(contents)
+        let data = JSON.parse(contents)
         if (err) {
           done(err)
         }
-        for (var i = 0; i < data.length; i++) {
+        for (let i = 0; i < data.length; i++) {
           if (data[i].name === 'github-stats') {
             assert.equal(data[i].contributorsList[0]['# of commits'], 3)
             done()
@@ -27,7 +27,7 @@ describe('Non connected functions', function () {
     })
   })
   describe('Testing consolidateContributorsList()', function () {
-    var convert = require('../contributors.js')
+    let convert = require('../contributors.js')
     it('should return 1 active contributors for repos', function (done) {
       convert.consolidateContributorsList(filePath, 'aarlaud-snyk')
         .then((result) => {
@@ -53,8 +53,8 @@ describe('Connected functions', function () {
     const githubUtils = require('../github.js')
 
     it('should authenticate with token - fail for unknown repos', function (done) {
-      var options = { 'token': process.env.GITHUB_TOKEN }
-      var githubHandler = githubUtils.authenticate(options)
+      let options = { 'token': process.env.GITHUB_TOKEN }
+      let githubHandler = githubUtils.authenticate(options)
 
       githubHandler.get('/repos/doowb/fooobarbaz')
       .then(() => {
@@ -69,8 +69,8 @@ describe('Connected functions', function () {
     })
 
     it('should authenticate with token - works for known repos', function (done) {
-      var options = { 'token': process.env.GITHUB_TOKEN }
-      var githubHandler = githubUtils.authenticate(options)
+      let options = { 'token': process.env.GITHUB_TOKEN }
+      let githubHandler = githubUtils.authenticate(options)
 
       githubHandler.get('/repos/snyk/snyk')
       .then((data) => {

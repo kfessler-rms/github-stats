@@ -1,8 +1,8 @@
-var GitHub = require('github-base')
-var chalk = require('chalk')
+let GitHub = require('github-base')
+let chalk = require('chalk')
 
 const interpretResponseCode = (statusCode) => {
-  var response = ''
+  let response = ''
   switch (statusCode) {
     case 200:
     case 204:
@@ -24,8 +24,8 @@ const interpretResponseCode = (statusCode) => {
 }
 
 const authenticate = (options) => {
-  var githubHandler
-  var apiurl = 'https://api.github.com'
+  let githubHandler
+  let apiurl = 'https://api.github.com'
   if (options.apiurl) {
     if (options.apiurl.substring(0, 8) !== 'https://' || !options.apiurl.includes('/api/v3')) {
       console.log('The api url should look like https://mygheinstanceurl.mycompany.com/api/v3')
@@ -55,13 +55,18 @@ const authenticate = (options) => {
 
 const getGithubOrgList = (githubHandler, orgName, privateReposOnly) => {
   return new Promise((resolve, reject) => {
-    var url = '/orgs/' + orgName + '/repos?type=all'
+    let url = '/orgs/' + orgName + '/repos?type=all'
     if (privateReposOnly) url = '/orgs/' + orgName + '/repos?type=private'
     githubHandler.paged(url)
       .then((res) => {
         let interpretedResponse = interpretResponseCode(res.pages[0].statusCode)
         if (interpretedResponse === 'OK') {
-          var repos = pageCondenser(res.pages)
+          let repos = []
+          if (res.pages.length > 1) {
+            repos = pageCondenser(res.pages)
+          } else {
+            repos = res.pages[0]
+          }
           resolve(repos)
         } else {
           reject(interpretedResponse)
@@ -74,12 +79,12 @@ const getGithubOrgList = (githubHandler, orgName, privateReposOnly) => {
 }
 
 const pageCondenser = (pages) => {
-  var allBodies = []
-  for (var pageIndex in pages) {
+  let allBodies = []
+  for (let pageIndex in pages) {
     allBodies = allBodies.concat(pages[pageIndex].body)
   }
-  //console.log(allBodies)
+  // console.log(allBodies)
   return allBodies
 }
 
-module.exports = { authenticate, getGithubOrgList, pageCondenser }
+module.exports = { interpretResponseCode, authenticate, getGithubOrgList, pageCondenser }

@@ -1,9 +1,9 @@
-var chalk = require('chalk')
-var fs = require('fs')
-var path = require('path')
+let chalk = require('chalk')
+let fs = require('fs')
+let path = require('path')
 
-var nbOfDays = 90
-var roundedNbOfWeeks = Math.floor(nbOfDays / 7)
+let nbOfDays = 90
+let roundedNbOfWeeks = Math.floor(nbOfDays / 7)
 
 const processLists = (organization, data = null) => {
   consolidateContributorsList(organization, data)
@@ -13,16 +13,16 @@ const processLists = (organization, data = null) => {
 
 const consolidateContributorsList = (filePath, organization, data = null) => {
   return new Promise((resolve, reject) => {
-    var contributorsList = []
-    var forkContributorsList = []
+    let contributorsList = []
+    let forkContributorsList = []
     fs.readFile(filePath + organization, 'utf8', function (err, contents) {
-      var data = JSON.parse(contents)
+      let data = JSON.parse(contents)
       if (err) {
         throw new Error(err.message)
         reject(err)
       }
-      for (var i = 0; i < data.length; i++) {
-        for (var j = 0; j < data[i].contributorsList.length; j++) {
+      for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < data[i].contributorsList.length; j++) {
           if (data[i].forked) {
             if (data[i].contributorsList[j].name in forkContributorsList) {
               let commitCount = forkContributorsList[data[i].contributorsList[j].name]['# of commits']
@@ -46,8 +46,8 @@ const consolidateContributorsList = (filePath, organization, data = null) => {
 }
 
 const displayResults = (contributorsList, forkcontributorsList) => {
-  var contributorsCount = 0
-  for (var x in contributorsList) { contributorsCount++ }
+  let contributorsCount = 0
+  for (let x in contributorsList) { contributorsCount++ }
   console.log(chalk.red('\nTotal active contributors with commit in the last ' + nbOfDays + ' days (rounded at ' + roundedNbOfWeeks + ' weeks) = ' + contributorsCount + '\n'))
 
   if (contributorsCount > 0) {
@@ -56,8 +56,8 @@ const displayResults = (contributorsList, forkcontributorsList) => {
     console.log('\n')
   }
 
-  var forkContributorsCount = 0
-  for (x in forkcontributorsList) { forkContributorsCount++ }
+  let forkContributorsCount = 0
+  for (let x in forkcontributorsList) { forkContributorsCount++ }
   console.log(chalk.red('\nTotal forked repo active contributors with commit in the last ' + nbOfDays + ' days (rounded at ' + roundedNbOfWeeks + ' weeks) = ' + forkContributorsCount + '\n'))
 
   if (contributorsCount > 0) {

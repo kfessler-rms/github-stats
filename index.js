@@ -3,18 +3,18 @@
 
 const INTER_CALLS_DELAY = 1000
 
-var program = require('commander')
+let program = require('commander')
 const chalk = require('chalk')
 const figlet = require('figlet')
-var fs = require('fs')
-var path = require('path')
-var contributors = require('./contributors.js')
-var githubUtils = require('./github')
-var nbOfDays = 90
-var roundedNbOfWeeks = Math.floor(nbOfDays / 7)
+let fs = require('fs')
+let path = require('path')
+let contributors = require('./contributors.js')
+let githubUtils = require('./github')
+let nbOfDays = 90
+let roundedNbOfWeeks = Math.floor(nbOfDays / 7)
 
-var filePath = path.join(__dirname, '/tmp/')
-var organization = ''
+let filePath = path.join(__dirname, '/tmp/')
+let organization = ''
 const EventEmitter = require('events').EventEmitter
 const eventEmitter = new EventEmitter()
 
@@ -30,9 +30,14 @@ const getGithubRepoStats = (githubHandler, orgName, repoName) => {
   return new Promise((resolve, reject) => {
     githubHandler.paged('/repos/' + orgName + '/' + repoName + '/stats/contributors')
       .then((res) => {
-        let interpretedResponse = interpretResponseCode(res.pages[0].statusCode)
+        let interpretedResponse = githubUtils.interpretResponseCode(res.pages[0].statusCode)
         if (interpretedResponse === 'OK') {
-          var repos = githubUtils.pageCondenser(res.pages)
+          let repos = []
+          if (res.pages.length > 1) {
+            repos = githubUtils.pageCondenser(res.pages)
+          } else {
+            repos = res.pages[0].body
+          }
           resolve(repos)
         } else {
           console.error('Issue with ' + orgName + '/' + repoName)
@@ -49,15 +54,15 @@ const getGithubRepoSummaryStats = (githubHandler, orgName, repoName, isForked) =
   return new Promise((resolve, reject) => {
     getGithubRepoStats(githubHandler, orgName, repoName)
       .then((data) => {
-        var contributorsList = []
-        for (var i = 0; i < data.length; i++) {
-          var nbOfWeeks = roundedNbOfWeeks
+        let contributorsList = []
+        for (let i = 0; i < data.length; i++) {
+          let nbOfWeeks = roundedNbOfWeeks
           if (data[i].weeks.length < roundedNbOfWeeks) {
             nbOfWeeks = data[i].weeks.length
           }
 
-          var nbOfCommits = 0
-          for (var j = data[i].weeks.length - nbOfWeeks; j < data[i].weeks.length; j++) {
+          let nbOfCommits = 0
+          for (let j = data[i].weeks.length - nbOfWeeks; j < data[i].weeks.length; j++) {
             // weeksList.push(res[i].weeks[j].w+"-#commits "+res[i].weeks[j].c);
             if (data[i].weeks[j].c > 0) {
               nbOfCommits += data[i].weeks[j].c
@@ -80,7 +85,7 @@ const getGithubRepoSummaryStats = (githubHandler, orgName, repoName, isForked) =
 }
 
 const registerEventListeners = (promiseArray) => {
-  var lastMessage
+  let lastMessage
   // register a listener for the 'randomString' event
   eventEmitter.on('promiseCompleted', function (repoName, list) {
     console.log(list.length + ' contributors for \t' + repoName)
@@ -89,9 +94,9 @@ const registerEventListeners = (promiseArray) => {
       if (err) {
         throw new Error(err.message)
       }
-      var repoListArray = JSON.parse(contents)
-      var newContent = []
-      for (var i = 0; i < repoListArray.length; i++) {
+      let repoListArray = JSON.parse(contents)
+      let newContent = []
+      for (let i = 0; i < repoListArray.length; i++) {
         if (repoListArray[i].name === repoName) {
           // console.log({"name":repoListArray[i].name, "forked":repoListArray[i].forked, "contributorsList":list});
           newContent.push({ 'name': repoListArray[i].name, 'forked': repoListArray[i].forked, 'contributorsList': list })
@@ -190,7 +195,7 @@ program
     if (!options.raw) {
       introText()
     }
-    var github = githubUtils.authenticate(options)
+    let github = githubUtils.authenticate(options)
     githubUtils.getGithubOrgList(github, org, options.private)
       .then((data) => {
         if (!options.raw) {
@@ -198,8 +203,8 @@ program
           console.log(chalk.blue('\nTotal # of repos = ' + data.length))
           console.log(chalk.blue('\nRepo list:'))
         }
-        var forkedRepos = []
-        for (var i = 0; i < data.length; i++) {
+        let forkedRepos = []
+        for (let i = 0; i < data.length; i++) {
           if (data[i].fork) {
             forkedRepos.push(data[i].name)
           } else {
@@ -230,19 +235,19 @@ program
   .option('-apiurl, --apiurl [apiurl]', 'API url if not https://api.Github.com')
   .action((org, repo, options) => {
     if (!options.raw) introText()
-    var github = githubUtils.authenticate(options)
+    let github = githubUtils.authenticate(options)
     getGithubRepoStats(github, org, repo)
       .then((data) => {
-        var rawCount = data.length
-        var contributorsList = []
-        for (var i = 0; i < data.length; i++) {
-          var nbOfWeeks = roundedNbOfWeeks
+        let rawCount = data.length
+        let contributorsList = []
+        for (let i = 0; i < data.length; i++) {
+          let nbOfWeeks = roundedNbOfWeeks
           if (data[i].weeks.length < roundedNbOfWeeks) {
             nbOfWeeks = data[i].weeks.length
           }
 
-          var nbOfCommits = 0
-          for (var j = data[i].weeks.length - nbOfWeeks; j < data[i].weeks.length; j++) {
+          let nbOfCommits = 0
+          for (let j = data[i].weeks.length - nbOfWeeks; j < data[i].weeks.length; j++) {
             // weeksList.push(res[i].weeks[j].w+"-#commits "+res[i].weeks[j].c);
             if (data[i].weeks[j].c > 0) {
               nbOfCommits += data[i].weeks[j].c
@@ -284,8 +289,8 @@ program
   .action((org, options) => {
     introText()
 
-    var github = githubUtils.authenticate(options)
-    var promiseArray = []
+    let github = githubUtils.authenticate(options)
+    let promiseArray = []
     organization = org
 
     if (!fs.existsSync(filePath)) {
@@ -297,15 +302,15 @@ program
         if (err) {
           throw new Error(err.message)
         }
-        var repoListArray = JSON.parse(contents)
-        var repoToBeProcessed = []
-        for (var i = 0; i < repoListArray.length; i++) {
+        let repoListArray = JSON.parse(contents)
+        let repoToBeProcessed = []
+        for (let i = 0; i < repoListArray.length; i++) {
           if (!repoListArray[i].hasOwnProperty('contributorsList')) {
             repoToBeProcessed.push(repoListArray[i])
           }
         }
 
-        var repoArray = repoToBeProcessed.map(repo => () =>
+        let repoArray = repoToBeProcessed.map(repo => () =>
           getGithubRepoSummaryStats(github, org, repo.name, repo.forked)
         )
         registerEventListeners(repoArray)
@@ -317,7 +322,7 @@ program
         .then((data) => {
           if (options.private) console.log(chalk.red('\nPrivate Repos Only'))
           console.log(chalk.blue('\nTotal # of repos = ' + data.length))
-          var repoArray = data.map(repo => { return { 'name': repo.name, 'forked': repo.fork } })
+          let repoArray = data.map(repo => { return { 'name': repo.name, 'forked': repo.fork } })
           fs.writeFile(filePath + organization, JSON.stringify(repoArray), function (err) {
             if (err) {
               return console.log(err)
@@ -337,25 +342,3 @@ program
 program.parse(process.argv)
 
 if (program.args.length === 0) program.help()
-
-const interpretResponseCode = (statusCode) => {
-  var response = ''
-  switch (statusCode) {
-    case 200:
-    case 204:
-      response = 'OK'
-      break
-    case 202:
-      response = 'Github received listing request and is processing data. Please try again in a moment'
-      break
-    case 404:
-      response = 'Organization cannot be found.'
-      break
-    case 403:
-      response = 'Access Denied'
-      break
-    default:
-      response = 'Unexpected response code: ' + statusCode
-  }
-  return response
-}
